@@ -5,6 +5,7 @@ import plotly.io as pio
 import plotly.express as px
 import plotly.graph_objects as go
 from config import teams_color, stats_map
+import json
 
 
 def load_data(file_path):
@@ -43,6 +44,57 @@ def format_stat_name(stat_name):
     #return ' '.join(word.capitalize() for word in stat_name.split('_'))
     return stats_map[stat_name]
 
+SIDEBAR_STYLE = {
+    "position": "fixed",
+    "top": 0,
+    "left": 0,
+    "bottom": 0,
+    "width": "16rem",
+    "padding": "2rem 1rem"
+    #"background-color": "#f8f9fa",
+}
+
+CONTENT_STYLE = {
+    "margin-left": "18rem",
+    "margin-right": "2rem",
+    "padding": "2rem 1rem",
+}
+
+styles = {
+    'pre': {
+        'border': 'thin lightgrey solid',
+        'overflowX': 'scroll'
+    }
+}
+
+
+def create_sidebar():
+    sidebar = html.Div([
+        html.H2("Player", className="display-4"),
+        html.Div([
+            dcc.Markdown("""
+                **Click Data**
+
+                Click on points in the graph.
+            """),
+            html.Pre(id='click-data', style=styles['pre']),
+        ], className='three columns'),
+    ], style=SIDEBAR_STYLE)
+    return sidebar
+
+
+def create_sidebar_callback(app, position, df):
+    @app.callback(
+        Output('click-data', 'children'),
+        Input(f'{position.lower()}-chart', 'clickData'))
+    def display_click_data(clickData):
+        answer=json.dumps(clickData, indent=2)
+        real= json.loads(answer)
+        return real['points'][0]['meta']
+        
+        #return answer
+    return display_click_data
+
 def create_tab_content(app, position, stats, top_players, df):
     """
     Create the HTML content for each position tab.
@@ -58,19 +110,29 @@ def create_tab_content(app, position, stats, top_players, df):
     """
 
     return html.Div([
-        dcc.Graph(id=f'{position.lower()}-chart'),
+        dcc.Graph(id=f'{position.lower()}-chart', className='mb-3'),
+        html.H5('X-axis Select:'),
         dcc.Dropdown(
-            id=f'{position.lower()}-stat-dropdown',
+            id=f'{position.lower()}-stat-dropdown-x',
+            options=[{'label': format_stat_name(stat), 'value': stat} for stat in stats],
+            value=stats[1],
+            className='btn w-100 mb-4',
+        ),
+        html.H5('Y-axis Select:'),
+        dcc.Dropdown(
+            id=f'{position.lower()}-stat-dropdown-y',
             options=[{'label': format_stat_name(stat), 'value': stat} for stat in stats],
             value=stats[0],
-            className='btn w-100 mb-4'
+            className='btn w-100 mb-4',
         ),
+        html.H5('Player Select:'),
         dcc.Dropdown(
             id=f'{position.lower()}-player-dropdown',
             options=[{'label': player, 'value': player} for player in df['name'].unique()],
             value=top_players,
             multi=True,
-            className='mb-3'
+            className='mb-3',
+            style={'padding': '10px'}
         )
     ], className="dash-bootstrap")
 
@@ -88,11 +150,12 @@ def create_player_callback(app, position, df):
     """
     @app.callback(
         Output(f'{position.lower()}-chart', 'figure'),
-        [Input(f'{position.lower()}-stat-dropdown', 'value'),
+        [Input(f'{position.lower()}-stat-dropdown-x', 'value'),
+         Input(f'{position.lower()}-stat-dropdown-y', 'value'),
          Input(f'{position.lower()}-player-dropdown', 'value'),
          Input("color-mode-switch", "value")]
     )
-    def update_chart(selected_stat, selected_players, switch_on):
+    def update_chart(selected_stat_x, selected_stat_y, selected_players, switch_on):
         """assets
         Update the player chart based on the selected stat and player(s).
 
@@ -106,19 +169,19 @@ def create_player_callback(app, position, df):
         dbc.Label(className="Player_Stats_Scatter", html_for="scatter")
         filtered_df = df[df['name'].isin(selected_players)]
         filtered_df = filtered_df[filtered_df['situation']=='all']
-        hover_template = '<b>%{meta}</b>' + '<br>Icetime : %{x} min'+ '<br>' + selected_stat + ' : %{y}'
+        filtered_df.icetime = round(filtered_df.icetime/60)
+        filtered_df.timeOnBench = round(filtered_df.timeOnBench/60)
         #template = pio.templates["minty"] if switch_on else pio.templates["minty_dark"]
         template = pio.templates["minty"]
-    
+        hover_template = '<b>%{meta}</b>' + '<br>' + format_stat_name(selected_stat_x) + ' : %{x} min'+ '<br>' + format_stat_name(selected_stat_y) + ' : %{y}'
 
         fig = go.Figure()
-        fig.add_trace(go.Scatter(meta=filtered_df.name, x=filtered_df.icetime/60, y=filtered_df[selected_stat], mode='markers', marker_color=filtered_df['team'].map(teams_color)))
-        fig.update_layout(title=f'{position} {format_stat_name(selected_stat)}', plot_bgcolor= '#343A40', paper_bgcolor= '#2B3035', font_color= '#eee')
+        fig.add_trace(go.Scatter(meta=filtered_df.name, x=filtered_df[selected_stat_x], y=filtered_df[selected_stat_y], mode='markers', marker_color=filtered_df['team'].map(teams_color)))
+        fig.update_layout(title=f'{position} - {format_stat_name(selected_stat_x)} vs {format_stat_name(selected_stat_y)}', plot_bgcolor= '#343A40', paper_bgcolor= '#2B3035', font_color= '#eee')
         fig.update_traces(hovertemplate = hover_template)
-
-        fig.update_traces(marker_line_width=1, marker_size=10)
-        fig.update_yaxes(title_text=format_stat_name(selected_stat))
-        fig.update_xaxes(title_text='Icetime (minutes)')
+        fig.update_traces(marker_line_width=1, marker_size=10, name="")
+        fig.update_yaxes(title_text=format_stat_name(selected_stat_y))
+        fig.update_xaxes(title_text=format_stat_name(selected_stat_x))
         fig["layout"]["template"] = template
         
         return fig

@@ -46,7 +46,7 @@ skater_stats= [
 
 stats_map = {
     'games_played': 'Games Played',
-    'icetime': 'Icetime',
+    'icetime': 'Icetime (min)',
     'shifts': 'Shifts',
     'gameScore': 'Game Score',
     'onIce_xGoalsPercentage': 'xGoals Percentage - On Ice',
@@ -118,7 +118,7 @@ stats_map = {
     'I_F_flyShiftEnds': 'Shift Ends - On The Fly',
     'faceoffsWon': 'FaceOffs Won - On Ice',
     'faceoffsLost': 'Faceoffs Lost - On Ice',
-    'timeOnBench': 'Time On Bench',
+    'timeOnBench': 'Time On Bench (min)',
     'penalityMinutes': 'Penalty Minutes',
     'penalityMinutesDrawn': 'Penalty Minutes Drawn',
     'penaltiesDrawn': 'Penalties Drawn',
