@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.io as pio
 import plotly.express as px
 import plotly.graph_objects as go
-from config import teams_color
+from config import teams_color, stats_map
 
 
 def load_data(file_path):
@@ -40,7 +40,8 @@ def format_stat_name(stat_name):
     Returns:
         str: The formatted statistic name.
     """
-    return ' '.join(word.capitalize() for word in stat_name.split('_'))
+    #return ' '.join(word.capitalize() for word in stat_name.split('_'))
+    return stats_map[stat_name]
 
 def create_tab_content(app, position, stats, top_players, df):
     """
@@ -62,7 +63,7 @@ def create_tab_content(app, position, stats, top_players, df):
             id=f'{position.lower()}-stat-dropdown',
             options=[{'label': format_stat_name(stat), 'value': stat} for stat in stats],
             value=stats[0],
-            className='btn w-50 mb-4'
+            className='btn w-100 mb-4'
         ),
         dcc.Dropdown(
             id=f'{position.lower()}-player-dropdown',
