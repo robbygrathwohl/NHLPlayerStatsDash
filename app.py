@@ -58,7 +58,7 @@ app.layout = dbc.Container([html.Div([
     # Dashboard section
     html.Div([
         html.H1(f'NHL Player Stats 2023-2024', className='text-center'),
-        #create_sidebar(), 
+        create_sidebar(), 
         html.Div([
             html.Div([
                 html.H2('Players Stats by Position', className='text-center'),
@@ -114,7 +114,7 @@ create_player_callback(app, 'LW', df_lw)
 create_player_callback(app, 'D', df_d)
 create_player_callback(app, 'All Skaters', df)
 
-create_sidebar_callback(app, 'C', df_c)
+create_sidebar_callback(app, 'C', df.loc[df['situation']=='all'])
 # create_sidebar_callback(app, 'RW', df_rw)
 # create_sidebar_callback(app, 'LW', df_lw)
 # create_sidebar_callback(app, 'D', df_d)

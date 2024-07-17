@@ -67,6 +67,11 @@ styles = {
     }
 }
 
+def get_player_id(player_name, df):
+    return 0
+
+def player_profile_card(player_id):
+    return 0
 
 def create_sidebar():
     sidebar = html.Div([
@@ -78,6 +83,7 @@ def create_sidebar():
                 Click on points in the graph.
             """),
             html.Pre(id='click-data', style=styles['pre']),
+            dcc.Markdown(id='sidebar')
         ], className='three columns'),
     ], style=SIDEBAR_STYLE)
     return sidebar
@@ -86,11 +92,13 @@ def create_sidebar():
 def create_sidebar_callback(app, position, df):
     @app.callback(
         Output('click-data', 'children'),
-        Input(f'{position.lower()}-chart', 'clickData'))
+        #Output('sidebar', 'children'),
+        Input(f'{position.lower()}-chart', 'clickData'),
+        prevent_initial_callbacks=True)
     def display_click_data(clickData):
-        answer=json.dumps(clickData, indent=2)
-        real= json.loads(answer)
-        return real['points'][0]['meta']
+        player_name=clickData['points'][0]['meta']
+        player = df[(df['name']==player_name)]
+        return player.to_json()
         
         #return answer
     return display_click_data
