@@ -58,7 +58,7 @@ app.layout = dbc.Container([html.Div([
     # Dashboard section
     html.Div([
         html.H1(f'NHL Player Stats 2023-2024', className='text-center'),
-        create_sidebar(), 
+        #create_sidebar(), 
         html.Div([
             html.Div([
                 html.H2('Players Stats by Position', className='text-center'),

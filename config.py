@@ -185,7 +185,7 @@ stats_map = {
     'OnIce_A_xGoals_with_earned_rebounds_scoreFlurryAdjusted': 'xGoals w/ Earned Rebounds - On Ice For - Score Flurry Adjusted',
     'OffIce_F_xGoals': 'xGoals For - Off Ice For',
     'OffIce_A_xGoals': 'xGoals Against - Off Ice For',
-    'OffIce_F_shotAttempts': 'xGoals For - Off Ice For',
+    'OffIce_F_shotAttempts': 'Shot Attempts - Off Ice For',
     'OffIce_A_shotAttempts': 'Shot Attempts - Off Ice Against',
     'xGoalsForAfterShifts': 'xGoals For - After Shifts',
     'xGoalsAgainstAfterShifts': 'xGoals Against - After Shifts',
