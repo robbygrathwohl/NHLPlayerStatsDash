@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.io as pio
 import plotly.express as px
 import plotly.graph_objects as go
+import textwrap
 from config import teams_color, stats_map
 import json
 
@@ -44,6 +45,16 @@ def format_stat_name(stat_name):
     #return ' '.join(word.capitalize() for word in stat_name.split('_'))
     return stats_map[stat_name]
 
+player_profile = {
+    "position": "",
+    "top":"",
+    "left": "",
+    "bottom": "",
+    "width": "",
+    "padding": ""
+}
+
+
 SIDEBAR_STYLE = {
     "position": "fixed",
     "top": 0,
@@ -64,14 +75,35 @@ styles = {
     'pre': {
         'border': 'thin lightgrey solid',
         'overflowX': 'scroll'
+    },
+    'img': {
+        'border': 'thin lightgrey solid',
+        'width': '100%',
+        'height': '60'
     }
 }
 
 def get_player_id(player_name, df):
-    return 0
+    player_id = df.loc[(df['name']==player_name, 'playerId')].iloc[0]
+    return player_id
 
-def player_profile_card(player_id):
-    return 0
+def get_player_team(player_name, df):
+    team_abbr = df.loc[(df['name']==player_name, 'team')].iloc[0]
+    return team_abbr
+
+def get_player_mug(player_name, df):
+    player_id = get_player_id(player_name, df)
+    player_team = get_player_team(player_name, df)
+    return f'https://assets.nhle.com/mugs/nhl/20242025/{player_team}/{player_id}.png'
+
+def get_player_team_logo(player_name, df):
+    player_team = get_player_team(player_name, df)
+    return f'https://assets.nhle.com/logos/nhl/svg/{player_team}_light.svg'
+
+def player_profile_card(player_name, df):
+    player_card_mug = get_player_mug(player_name, df)
+    player_card_team = get_player_team_logo(player_name, df)
+    return player_card_team, player_card_mug
 
 def create_sidebar():
     sidebar = html.Div([
@@ -82,8 +114,11 @@ def create_sidebar():
 
                 Click on points in the graph.
             """),
-            html.Pre(id='click-data', style=styles['pre']),
-            dcc.Markdown(id='sidebar')
+            dcc.Markdown(id='player_card', style=styles['img']),
+            html.Div([
+                html.Img(id='player_card_team', style=styles['img']),
+                html.Img(id='player_card_mug', style=styles['img']),
+            ],id='player_card_div'),
         ], className='three columns'),
     ], style=SIDEBAR_STYLE)
     return sidebar
@@ -91,16 +126,14 @@ def create_sidebar():
 
 def create_sidebar_callback(app, position, df):
     @app.callback(
-        Output('click-data', 'children'),
-        #Output('sidebar', 'children'),
+        [Output('player_card_team', 'src'),
+        Output('player_card_mug', 'src')],
         Input(f'{position.lower()}-chart', 'clickData'),
         prevent_initial_callbacks=True)
     def display_click_data(clickData):
         player_name=clickData['points'][0]['meta']
-        player = df[(df['name']==player_name)]
-        return player.to_json()
+        return player_profile_card(player_name, df)
         
-        #return answer
     return display_click_data
 
 def create_tab_content(app, position, stats, top_players, df):
@@ -188,6 +221,7 @@ def create_player_callback(app, position, df):
         fig.update_layout(title=f'{position} - {format_stat_name(selected_stat_x)} vs {format_stat_name(selected_stat_y)}', plot_bgcolor= '#343A40', paper_bgcolor= '#2B3035', font_color= '#eee')
         fig.update_traces(hovertemplate = hover_template)
         fig.update_traces(marker_line_width=1, marker_size=10, name="")
+        #fig.update_traces(trendline='ols')
         fig.update_yaxes(title_text=format_stat_name(selected_stat_y))
         fig.update_xaxes(title_text=format_stat_name(selected_stat_x))
         fig["layout"]["template"] = template
