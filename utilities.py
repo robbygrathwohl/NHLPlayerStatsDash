@@ -1,4 +1,4 @@
-from dash import html, dcc, dash_table, Input, Output, Patch
+from dash import html, dcc, dash_table, Input, Output, ctx, Patch
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.io as pio
@@ -118,6 +118,8 @@ def create_sidebar():
     ], style=styles['sidebar'], className='dbc')
     return sidebar
 
+def get_prop(child):
+    return child['points'][0]['meta']
 
 def create_sidebar_callback(app, position, df):
     @app.callback(
@@ -126,10 +128,23 @@ def create_sidebar_callback(app, position, df):
         Output('player_card_mug', 'src'),
         Output('player_card_stats', 'children')],
         #Output('player_table', 'children')],
-        Input(f'{position.lower()}-chart', 'clickData'),
+        [Input(f'c-chart', 'clickData'),
+         Input(f'rw-chart', 'clickData'),
+         Input(f'lw-chart', 'clickData'),
+         Input(f'd-chart', 'clickData'),
+         Input(f'all skaters-chart', 'clickData')],
         prevent_initial_callbacks=True)
-    def display_click_data(clickData):
-        player_name=clickData['points'][0]['meta']
+    def display_click_data(clickData_c, clickData_rw, clickData_lw, clickData_d, clickData_a):
+        if ctx.triggered_id == 'c-chart':
+            player_name = get_prop(clickData_c)
+        if ctx.triggered_id == 'rw-chart':
+            player_name = get_prop(clickData_rw)
+        if ctx.triggered_id == 'lw-chart':
+            player_name = get_prop(clickData_lw)
+        if ctx.triggered_id == 'd-chart':
+            player_name = get_prop(clickData_d)
+        if ctx.triggered_id == 'all skaters-chart':
+            player_name = get_prop(clickData_a)
         return player_profile_card(player_name, df)
         
     return display_click_data
