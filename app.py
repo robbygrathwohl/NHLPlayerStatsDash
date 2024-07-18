@@ -12,7 +12,6 @@ df = load_data(file_path)
 
 # Initialize dash app with bootstrap theme
 load_figure_template(['minty','minty_dark'])
-#load_figure_template('darkly')
 app = Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.MINTY, dbc.icons.FONT_AWESOME])
 server = app.server
 

@@ -1,11 +1,11 @@
-from dash import html, dcc, Input, Output, Patch
+from dash import html, dcc, dash_table, Input, Output, Patch
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.io as pio
 import plotly.express as px
 import plotly.graph_objects as go
 import textwrap
-from config import teams_color, stats_map
+from config import teams_color, stats_map, player_profile, styles
 import json
 
 
@@ -45,43 +45,9 @@ def format_stat_name(stat_name):
     #return ' '.join(word.capitalize() for word in stat_name.split('_'))
     return stats_map[stat_name]
 
-player_profile = {
-    "position": "",
-    "top":"",
-    "left": "",
-    "bottom": "",
-    "width": "",
-    "padding": ""
-}
 
 
-SIDEBAR_STYLE = {
-    "position": "fixed",
-    "top": 0,
-    "left": 0,
-    "bottom": 0,
-    "width": "16rem",
-    "padding": "2rem 1rem"
-    #"background-color": "#f8f9fa",
-}
 
-CONTENT_STYLE = {
-    "margin-left": "18rem",
-    "margin-right": "2rem",
-    "padding": "2rem 1rem",
-}
-
-styles = {
-    'pre': {
-        'border': 'thin lightgrey solid',
-        'overflowX': 'scroll'
-    },
-    'img': {
-        'border': 'thin lightgrey solid',
-        'width': '100%',
-        'height': '60'
-    }
-}
 
 def get_player_id(player_name, df):
     player_id = df.loc[(df['name']==player_name, 'playerId')].iloc[0]
@@ -100,34 +66,66 @@ def get_player_team_logo(player_name, df):
     player_team = get_player_team(player_name, df)
     return f'https://assets.nhle.com/logos/nhl/svg/{player_team}_light.svg'
 
+def add_new_line(lst, string):
+    new_line = html.Br()
+    lst.append(string)
+    lst.append(new_line)
+    return lst
+
+def get_player_card_stats(player_name, df):
+    df = df[df['name']==player_name]
+    games_played = f'Games Played: {round(df.games_played.iloc[0])}'
+    position = f'Position: {df.position.iloc[0]}'
+    points = f'Points: {round(df.I_F_points.iloc[0])}'
+    goals = f'Goals: {round(df.I_F_goals.iloc[0])}'
+    assists = f'Assists: {round(df.I_F_primaryAssists.iloc[0]+df.I_F_secondaryAssists.iloc[0])}'
+    paragraph = []
+    paragraph = add_new_line(paragraph, games_played)
+    paragraph = add_new_line(paragraph, position)
+    paragraph = add_new_line(paragraph, points)
+    paragraph = add_new_line(paragraph, goals)
+    paragraph = add_new_line(paragraph, assists)
+    #print(paragraph)
+    return paragraph
+
+def get_player_table(player_name, df):
+    df = df[df['name']==player_name]
+    df_dict = df = df[df['name']==player_name].transpose().to_dict('records')
+    #df = df[df['name']==player_name].transpose()
+    #print(df)
+    return dash_table.DataTable(df_dict, style_header= {'display': 'True'}, virtualization=True, style_table={'overflowY':'scroll'})
+
 def player_profile_card(player_name, df):
     player_card_mug = get_player_mug(player_name, df)
     player_card_team = get_player_team_logo(player_name, df)
-    return player_card_team, player_card_mug
+    player_card_stats = get_player_card_stats(player_name, df)
+    #player_table = get_player_table(player_name, df)
+    return player_name, player_card_team, player_card_mug, player_card_stats
+
 
 def create_sidebar():
     sidebar = html.Div([
         html.H2("Player", className="display-4"),
         html.Div([
-            dcc.Markdown("""
-                **Click Data**
-
-                Click on points in the graph.
-            """),
-            dcc.Markdown(id='player_card', style=styles['img']),
             html.Div([
+                html.H4(id='player_name', style=styles['name']),
                 html.Img(id='player_card_team', style=styles['img']),
                 html.Img(id='player_card_mug', style=styles['img']),
-            ],id='player_card_div'),
-        ], className='three columns'),
-    ], style=SIDEBAR_STYLE)
+                html.P(id='player_card_stats', style=styles['name']),
+                #dbc.Container([], fluid=True, id='player_table', className='h-25', style=styles['table'])
+            ],id='player_card_div', **{"data-bs-theme": "dark"}),
+        ]),
+    ], style=styles['sidebar'], className='dbc')
     return sidebar
 
 
 def create_sidebar_callback(app, position, df):
     @app.callback(
-        [Output('player_card_team', 'src'),
-        Output('player_card_mug', 'src')],
+        [Output('player_name', 'children'),
+        Output('player_card_team', 'src'),
+        Output('player_card_mug', 'src'),
+        Output('player_card_stats', 'children')],
+        #Output('player_table', 'children')],
         Input(f'{position.lower()}-chart', 'clickData'),
         prevent_initial_callbacks=True)
     def display_click_data(clickData):
@@ -213,18 +211,18 @@ def create_player_callback(app, position, df):
         filtered_df.icetime = round(filtered_df.icetime/60)
         filtered_df.timeOnBench = round(filtered_df.timeOnBench/60)
         #template = pio.templates["minty"] if switch_on else pio.templates["minty_dark"]
-        template = pio.templates["minty"]
+        #template = pio.templates["minty"]
         hover_template = '<b>%{meta}</b>' + '<br>' + format_stat_name(selected_stat_x) + ' : %{x} min'+ '<br>' + format_stat_name(selected_stat_y) + ' : %{y}'
 
         fig = go.Figure()
         fig.add_trace(go.Scatter(meta=filtered_df.name, x=filtered_df[selected_stat_x], y=filtered_df[selected_stat_y], mode='markers', marker_color=filtered_df['team'].map(teams_color)))
-        fig.update_layout(title=f'{position} - {format_stat_name(selected_stat_x)} vs {format_stat_name(selected_stat_y)}', plot_bgcolor= '#343A40', paper_bgcolor= '#2B3035', font_color= '#eee')
+        fig.update_layout(title=f'{position} - {format_stat_name(selected_stat_x)} vs {format_stat_name(selected_stat_y)}', plot_bgcolor= '#343A40', paper_bgcolor= '#2B3035')
         fig.update_traces(hovertemplate = hover_template)
         fig.update_traces(marker_line_width=1, marker_size=10, name="")
         #fig.update_traces(trendline='ols')
         fig.update_yaxes(title_text=format_stat_name(selected_stat_y))
         fig.update_xaxes(title_text=format_stat_name(selected_stat_x))
-        fig["layout"]["template"] = template
+        #fig["layout"]["template"] = template
         
         return fig
     return update_chart
