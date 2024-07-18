@@ -42,7 +42,6 @@ def format_stat_name(stat_name):
     Returns:
         str: The formatted statistic name.
     """
-    #return ' '.join(word.capitalize() for word in stat_name.split('_'))
     return stats_map[stat_name]
 
 
@@ -85,21 +84,20 @@ def get_player_card_stats(player_name, df):
     paragraph = add_new_line(paragraph, points)
     paragraph = add_new_line(paragraph, goals)
     paragraph = add_new_line(paragraph, assists)
-    #print(paragraph)
+
     return paragraph
 
 def get_player_table(player_name, df):
     df = df[df['name']==player_name]
     df_dict = df = df[df['name']==player_name].transpose().to_dict('records')
-    #df = df[df['name']==player_name].transpose()
-    #print(df)
+
     return dash_table.DataTable(df_dict, style_header= {'display': 'True'}, virtualization=True, style_table={'overflowY':'scroll'})
 
 def player_profile_card(player_name, df):
     player_card_mug = get_player_mug(player_name, df)
     player_card_team = get_player_team_logo(player_name, df)
     player_card_stats = get_player_card_stats(player_name, df)
-    #player_table = get_player_table(player_name, df)
+
     return player_name, player_card_team, player_card_mug, player_card_stats
 
 
@@ -112,7 +110,6 @@ def create_sidebar():
                 html.Img(id='player_card_team', style=styles['img']),
                 html.Img(id='player_card_mug', style=styles['img']),
                 html.P(id='player_card_stats', style=styles['name']),
-                #dbc.Container([], fluid=True, id='player_table', className='h-25', style=styles['table'])
             ],id='player_card_div', **{"data-bs-theme": "dark"}),
         ]),
     ], style=styles['sidebar'], className='dbc')
@@ -121,7 +118,7 @@ def create_sidebar():
 def get_prop(child):
     return child['points'][0]['meta']
 
-def create_sidebar_callback(app, position, df):
+def create_sidebar_callback(app, df):
     @app.callback(
         [Output('player_name', 'children'),
         Output('player_card_team', 'src'),
@@ -225,8 +222,7 @@ def create_player_callback(app, position, df):
         filtered_df = filtered_df[filtered_df['situation']=='all']
         filtered_df.icetime = round(filtered_df.icetime/60)
         filtered_df.timeOnBench = round(filtered_df.timeOnBench/60)
-        #template = pio.templates["minty"] if switch_on else pio.templates["minty_dark"]
-        #template = pio.templates["minty"]
+
         hover_template = '<b>%{meta}</b>' + '<br>' + format_stat_name(selected_stat_x) + ' : %{x} min'+ '<br>' + format_stat_name(selected_stat_y) + ' : %{y}'
 
         fig = go.Figure()
@@ -234,10 +230,9 @@ def create_player_callback(app, position, df):
         fig.update_layout(title=f'{position} - {format_stat_name(selected_stat_x)} vs {format_stat_name(selected_stat_y)}', plot_bgcolor= '#343A40', paper_bgcolor= '#2B3035')
         fig.update_traces(hovertemplate = hover_template)
         fig.update_traces(marker_line_width=1, marker_size=10, name="")
-        #fig.update_traces(trendline='ols')
         fig.update_yaxes(title_text=format_stat_name(selected_stat_y))
         fig.update_xaxes(title_text=format_stat_name(selected_stat_x))
-        #fig["layout"]["template"] = template
+
         
         return fig
     return update_chart

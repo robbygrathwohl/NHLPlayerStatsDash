@@ -397,7 +397,6 @@ SIDEBAR_STYLE = {
     "bottom": 0,
     "width": "16rem",
     "padding": "2rem 1rem"
-    #"background-color": "#f8f9fa",
 }
 
 CONTENT_STYLE = {
