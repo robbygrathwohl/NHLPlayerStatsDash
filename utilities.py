@@ -205,6 +205,9 @@ def get_prop(child):
     """
     extracts meta property given the html element id
 
+    Args:
+        child (pd.DataFrame): df of selected player
+
     Returns:
         str: player_name
     """
@@ -212,6 +215,7 @@ def get_prop(child):
     return player_name
 
 def create_sidebar_callback(app, df):
+
     @app.callback(
         [Output('player_name', 'children'),
         Output('player_card_team', 'src'),
