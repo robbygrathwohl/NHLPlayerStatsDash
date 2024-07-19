@@ -49,29 +49,89 @@ def format_stat_name(stat_name):
 
 
 def get_player_id(player_name, df):
+    """
+    Return the player ID given a player name
+
+    Args:
+        player_name (str): name of player with spaces.
+        df (pd.DataFrame): pandas dataframe of all player data
+
+    Returns:
+        str: player ID
+    """
     player_id = df.loc[(df['name']==player_name, 'playerId')].iloc[0]
     return player_id
 
 def get_player_team(player_name, df):
+    """
+    Return the team abbreviation of a player given a player name
+
+    Args:
+        player_name (str): name of player with spaces.
+        df (pd.DataFrame): pandas dataframe of all player data
+
+    Returns:
+        str: team abbreviation of player
+    """
     team_abbr = df.loc[(df['name']==player_name, 'team')].iloc[0]
     return team_abbr
 
 def get_player_mug(player_name, df):
+    """
+    Return the player mugshot (profile picture) link as a string
+
+    Args:
+        player_name (str): name of player with spaces.
+        df (pd.DataFrame): pandast dataframe of all player data
+
+    Returns:
+        str: url link of player mugshot
+    """
     player_id = get_player_id(player_name, df)
     player_team = get_player_team(player_name, df)
     return f'https://assets.nhle.com/mugs/nhl/20242025/{player_team}/{player_id}.png'
 
 def get_player_team_logo(player_name, df):
+    """
+    Return the team logo svg link given a player's name
+
+    Args:
+        player_name (str): name of player with spaces.
+        df (pd.DataFrame): pandast dataframe of all player data
+
+    Returns:
+        str: url link of player's team logo
+    """
     player_team = get_player_team(player_name, df)
     return f'https://assets.nhle.com/logos/nhl/svg/{player_team}_light.svg'
 
 def add_new_line(lst, string):
+    """
+    add new line html element to stats profile
+
+    Args:
+        lst (list): name of player with spaces.
+        string (string): pandast dataframe of all player data
+
+    Returns:
+        str: url link of player's team logo
+    """
     new_line = html.Br()
     lst.append(string)
     lst.append(new_line)
     return lst
 
 def get_player_card_stats(player_name, df):
+    """
+    create the printed player stats for the last clicked on player from any scatterplot tab
+
+    Args:
+        player_name (str): name of player with spaces.
+        df (pd.DataFrame): pandas dataframe of all player data
+
+    Returns:
+        str: stat details formatted for <p> child
+    """
     df = df[df['name']==player_name]
     games_played = f'Games Played: {round(df.games_played.iloc[0])}'
     position = f'Position: {df.position.iloc[0]}'
@@ -88,12 +148,32 @@ def get_player_card_stats(player_name, df):
     return paragraph
 
 def get_player_table(player_name, df):
+    """
+    create a DataTable with all stats for selected player
+
+    Args:
+        player_name (str): name of player with spaces.
+        df (pd.DataFrame): pandast dataframe of all player data
+
+    Returns:
+        dash_table.DataTable: DataTable with all of the stats for the given player
+    """
     df = df[df['name']==player_name]
     df_dict = df = df[df['name']==player_name].transpose().to_dict('records')
 
     return dash_table.DataTable(df_dict, style_header= {'display': 'True'}, virtualization=True, style_table={'overflowY':'scroll'})
 
 def player_profile_card(player_name, df):
+    """
+    create te player profile card to be loaded to the sidebar
+
+    Args:
+        player_name (str): name of player with spaces.
+        df (pd.DataFrame): pandast dataframe of all player data
+
+    Returns:
+        str: player name, str: url of team logo, str: url of player mugshot, list: summarized stats for player card 
+    """
     player_card_mug = get_player_mug(player_name, df)
     player_card_team = get_player_team_logo(player_name, df)
     player_card_stats = get_player_card_stats(player_name, df)
@@ -102,6 +182,12 @@ def player_profile_card(player_name, df):
 
 
 def create_sidebar():
+    """
+    create sidebar elements that will show the player card
+
+    Returns:
+        html.Div: sidebar
+    """
     sidebar = html.Div([
         html.H2("Player", className="display-4"),
         html.Div([
@@ -116,7 +202,14 @@ def create_sidebar():
     return sidebar
 
 def get_prop(child):
-    return child['points'][0]['meta']
+    """
+    extracts meta property given the html element id
+
+    Returns:
+        str: player_name
+    """
+    player_name = child['points'][0]['meta']
+    return player_name
 
 def create_sidebar_callback(app, df):
     @app.callback(
