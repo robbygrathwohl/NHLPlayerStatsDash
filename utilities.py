@@ -112,7 +112,7 @@ def create_sidebar():
                 html.P(id='player_card_stats', style=styles['name']),
             ],id='player_card_div', **{"data-bs-theme": "dark"}),
         ]),
-    ], style=styles['sidebar'], className='dbc')
+    ], style=styles['sidebar'], id='sidebar', className='dbc')
     return sidebar
 
 def get_prop(child):
