@@ -191,9 +191,9 @@ def create_sidebar(player_name):
         html.Div([
             html.Div([
                 html.H4(id='player_name', style=styles['name'], children=player_name),
-                html.Img(id='player_card_team', style=styles['img'], src=''),
-                html.Img(id='player_card_mug', style=styles['img'], src=''),
-                html.P(id='player_card_stats', style=styles['name']),
+                html.Img(id='player_card_team', style=styles['img'], src='/assets/Cuda.png'),
+                html.Img(id='player_card_mug', style=styles['img'], src='/assets/robby.jfif'),
+                html.P(id='player_card_stats', style=styles['name'], children=html.A('Robert Grathwohl player bio', href='https://www.mansfieldbarracudas.com/roster/robbie-grathwohl')),
             ],id='player_card_div', **{"data-bs-theme": "dark"}),
         ]),
     ], style=styles['sidebar'], id='sidebar', className='dbc')

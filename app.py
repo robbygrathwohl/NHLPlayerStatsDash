@@ -14,6 +14,7 @@ df = load_data(file_path)
 load_figure_template(['minty','minty_dark'])
 app = Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.MINTY, dbc.icons.FONT_AWESOME])
 server = app.server
+app.title = 'NHL Player Stats - 23-24'
 
 
 #color switcher
