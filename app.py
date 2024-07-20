@@ -16,8 +16,6 @@ app = Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[db
 server = app.server
 
 
-
-
 #color switcher
 color_mode_switch =  html.Span(
     [
@@ -29,16 +27,11 @@ color_mode_switch =  html.Span(
 )
 
 
-
-
-
 # Filter data for each position
 df_c = df[df['position'] == 'C']
 df_lw = df[df['position'] == 'L']
 df_rw = df[df['position'] == 'R']
 df_d = df[df['position'] == 'D']
-
-
 
 
 # Filter data for each position and select top 10 based on key stats
@@ -50,14 +43,13 @@ top_d = df_d.groupby('name').sum().reset_index().nlargest(100, 'I_F_points')['na
 
 
 
-
 # Create HTML Components
 app.layout = dbc.Container([html.Div([
     color_mode_switch,
     # Dashboard section
     html.Div([
         html.H1(f'NHL Player Stats 2023-2024', className='text-center'),
-        create_sidebar(), 
+        create_sidebar('Robert Grathwohl'), 
         html.Div([
             html.Div([
                 html.H2('Players Stats by Position', className='text-center'),
@@ -113,6 +105,7 @@ create_player_callback(app, 'LW', df_lw)
 create_player_callback(app, 'D', df_d)
 create_player_callback(app, 'All Skaters', df)
 
+# Update player card sidebar callback
 create_sidebar_callback(app, df.loc[df['situation']=='all'])
 
 

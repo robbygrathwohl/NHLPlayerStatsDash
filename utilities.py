@@ -46,8 +46,6 @@ def format_stat_name(stat_name):
 
 
 
-
-
 def get_player_id(player_name, df):
     """
     Return the player ID given a player name
@@ -181,7 +179,7 @@ def player_profile_card(player_name, df):
     return player_name, player_card_team, player_card_mug, player_card_stats
 
 
-def create_sidebar():
+def create_sidebar(player_name):
     """
     create sidebar elements that will show the player card
 
@@ -192,9 +190,9 @@ def create_sidebar():
         html.H2("Player", className="display-4"),
         html.Div([
             html.Div([
-                html.H4(id='player_name', style=styles['name']),
-                html.Img(id='player_card_team', style=styles['img']),
-                html.Img(id='player_card_mug', style=styles['img']),
+                html.H4(id='player_name', style=styles['name'], children=player_name),
+                html.Img(id='player_card_team', style=styles['img'], src=''),
+                html.Img(id='player_card_mug', style=styles['img'], src=''),
                 html.P(id='player_card_stats', style=styles['name']),
             ],id='player_card_div', **{"data-bs-theme": "dark"}),
         ]),
@@ -206,7 +204,7 @@ def get_prop(child):
     extracts meta property given the html element id
 
     Args:
-        child (pd.DataFrame): df of selected player
+        child (pd.DataFrame): df of selected playerf
 
     Returns:
         str: player_name
@@ -256,22 +254,23 @@ def create_tab_content(app, position, stats, top_players, df):
     Returns:
         html.Div: The HTML content for the position tab.
     """
-
     return html.Div([
-        dcc.Graph(id=f'{position.lower()}-chart', className='mb-3'),
+        html.Div([
+            dcc.Graph(id=f'{position.lower()}-chart', className='mb-3', responsive=True, style=styles['graph'])
+        ],className='mb-2', style={'height' : '550px'}),
         html.H5('X-axis Select:'),
         dcc.Dropdown(
             id=f'{position.lower()}-stat-dropdown-x',
             options=[{'label': format_stat_name(stat), 'value': stat} for stat in stats],
             value=stats[1],
-            className='btn w-100 mb-4',
+            className='btn w-75 mb-1',
         ),
         html.H5('Y-axis Select:'),
         dcc.Dropdown(
             id=f'{position.lower()}-stat-dropdown-y',
             options=[{'label': format_stat_name(stat), 'value': stat} for stat in stats],
             value=stats[0],
-            className='btn w-100 mb-4',
+            className='btn w-75 mb-4',
         ),
         html.H5('Player Select:'),
         dcc.Dropdown(
@@ -320,15 +319,15 @@ def create_player_callback(app, position, df):
         filtered_df.icetime = round(filtered_df.icetime/60)
         filtered_df.timeOnBench = round(filtered_df.timeOnBench/60)
 
-        hover_template = '<b>%{meta}</b>' + '<br>' + format_stat_name(selected_stat_x) + ' : %{x} min'+ '<br>' + format_stat_name(selected_stat_y) + ' : %{y}'
+        hover_template = '<b>%{meta}</b>' + '<br>' + format_stat_name(selected_stat_x) + ' : %{x}'+ '<br>' + format_stat_name(selected_stat_y) + ' : %{y}'
 
         fig = go.Figure()
         fig.add_trace(go.Scatter(meta=filtered_df.name, x=filtered_df[selected_stat_x], y=filtered_df[selected_stat_y], mode='markers', marker_color=filtered_df['team'].map(teams_color)))
-        fig.update_layout(title=f'{position} - {format_stat_name(selected_stat_x)} vs {format_stat_name(selected_stat_y)}', plot_bgcolor= '#343A40', paper_bgcolor= '#2B3035')
+        fig.update_layout(title=f'{position} - {format_stat_name(selected_stat_x)} vs {format_stat_name(selected_stat_y)}', plot_bgcolor= '#343A40', paper_bgcolor= '#2B3035', title_font_color='#c9c9c9')
         fig.update_traces(hovertemplate = hover_template)
         fig.update_traces(marker_line_width=1, marker_size=10, name="")
-        fig.update_yaxes(title_text=format_stat_name(selected_stat_y))
-        fig.update_xaxes(title_text=format_stat_name(selected_stat_x))
+        fig.update_yaxes(title_text=format_stat_name(selected_stat_y), title_font_color='#c9c9c9')
+        fig.update_xaxes(title_text=format_stat_name(selected_stat_x), title_font_color='#c9c9c9')
 
         
         return fig
