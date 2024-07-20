@@ -524,7 +524,7 @@ styles = {
         #"left": 0,
         "right":0,
         "bottom": 0,
-        "width": "18rem",
+        #"width": "18rem",
         "padding": "2rem 1rem"
         #"background-color": "#f8f9fa",
     },

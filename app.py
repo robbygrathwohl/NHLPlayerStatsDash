@@ -47,13 +47,17 @@ top_d = df_d.groupby('name').sum().reset_index().nlargest(100, 'I_F_points')['na
 # Create HTML Components
 app.layout = dbc.Container([html.Div([
     color_mode_switch,
+    #create_sidebar('Robert Grathwohl'),
     # Dashboard section
     html.Div([
         html.H1(f'NHL Player Stats 2023-2024', className='text-center'),
-        create_sidebar('Robert Grathwohl'), 
+         
         html.Div([
+            create_sidebar('Robert Grathwohl'),
+            #html.Div(className='col-2 col-xl-2'),
+            html.H2('Players Stats by Position', className='text-center mb-4'),
             html.Div([
-                html.H2('Players Stats by Position', className='text-center'),
+                
                 dbc.Tabs(
                     id='position-tabs',
                     active_tab='C',
@@ -85,7 +89,7 @@ app.layout = dbc.Container([html.Div([
                             children=create_tab_content(app, 'All Skaters', skater_stats, top_a, df)
                         )
                 ])
-            ], className='col-12 col-xl-12 px-12', style={'textAlign': 'center'}),
+            ], className='col-10', style={'textAlign': 'center'}),
         ], className='row')
     ]),
     html.Footer([
@@ -95,7 +99,7 @@ app.layout = dbc.Container([html.Div([
             html.A('Dataset Source - MoneyPuck', href='https://moneypuck.com/moneypuck/playerData/seasonSummary/2023/regular/skaters.csv')
         ], className='bg-dark text-light text-center py-3 fs-5')
     ])
-])])
+])], fluid=True)
 
 
 

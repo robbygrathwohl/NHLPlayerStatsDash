@@ -193,10 +193,10 @@ def create_sidebar(player_name):
                 html.H4(id='player_name', style=styles['name'], children=player_name),
                 html.Img(id='player_card_team', style=styles['img'], src='/assets/Cuda.png'),
                 html.Img(id='player_card_mug', style=styles['img'], src='/assets/robby.jfif'),
-                html.P(id='player_card_stats', style=styles['name'], children=html.A('Robert Grathwohl player bio', href='https://www.mansfieldbarracudas.com/roster/robbie-grathwohl')),
+                html.P(id='player_card_stats', style=styles['name'], children=[html.A('Robert Grathwohl', href='https://www.mansfieldbarracudas.com/roster/robbie-grathwohl'), ' Player Bio']),
             ],id='player_card_div', **{"data-bs-theme": "dark"}),
         ]),
-    ], style=styles['sidebar'], id='sidebar', className='dbc')
+    ], style=styles['sidebar'], id='sidebar', className='col-2 col-xl-2')
     return sidebar
 
 def get_prop(child):
@@ -225,7 +225,7 @@ def create_sidebar_callback(app, df):
          Input(f'lw-chart', 'clickData'),
          Input(f'd-chart', 'clickData'),
          Input(f'all skaters-chart', 'clickData')],
-        prevent_initial_callbacks=True)
+        prevent_initial_call=True)
     def display_click_data(clickData_c, clickData_rw, clickData_lw, clickData_d, clickData_a):
         if ctx.triggered_id == 'c-chart':
             player_name = get_prop(clickData_c)
@@ -255,33 +255,43 @@ def create_tab_content(app, position, stats, top_players, df):
         html.Div: The HTML content for the position tab.
     """
     return html.Div([
+        
         html.Div([
-            dcc.Graph(id=f'{position.lower()}-chart', className='mb-3', responsive=True, style=styles['graph'])
-        ],className='mb-2', style={'height' : '550px'}),
-        html.H5('X-axis Select:'),
-        dcc.Dropdown(
-            id=f'{position.lower()}-stat-dropdown-x',
-            options=[{'label': format_stat_name(stat), 'value': stat} for stat in stats],
-            value=stats[1],
-            className='btn w-75 mb-1',
-        ),
-        html.H5('Y-axis Select:'),
-        dcc.Dropdown(
-            id=f'{position.lower()}-stat-dropdown-y',
-            options=[{'label': format_stat_name(stat), 'value': stat} for stat in stats],
-            value=stats[0],
-            className='btn w-75 mb-4',
-        ),
-        html.H5('Player Select:'),
-        dcc.Dropdown(
-            id=f'{position.lower()}-player-dropdown',
-            options=[{'label': player, 'value': player} for player in df['name'].unique()],
-            value=top_players,
-            multi=True,
-            className='mb-3',
-            style={'padding': '10px'}
-        )
-    ], className="dash-bootstrap")
+            html.H5('Y-axis Select:', className='mt-4'),
+            dcc.Dropdown(
+                id=f'{position.lower()}-stat-dropdown-y',
+                options=[{'label': format_stat_name(stat), 'value': stat} for stat in stats],
+                value=stats[0],
+                optionHeight=50,
+                maxHeight=500,
+                style={'align-items':'left', 'justify-content':'center'},
+                className='btn w-100 mb-4')
+        ], className='col-3'),
+        html.Div([
+            html.Div([
+                dcc.Graph(id=f'{position.lower()}-chart', className='mb-3', responsive=True, style=styles['graph'])
+            ],className='mb-2', style={'height' : '550px'}),
+            html.H5('X-axis Select:',className=''),
+            dcc.Dropdown(
+                id=f'{position.lower()}-stat-dropdown-x',
+                options=[{'label': format_stat_name(stat), 'value': stat} for stat in stats],
+                value=stats[1],
+                style={'align-items':'left', 'justify-content':'center'},
+                className='btn w-75 mb-2',
+            ),
+            html.H5('Player Select:', className=''),
+            dcc.Dropdown(
+                id=f'{position.lower()}-player-dropdown',
+                options=[{'label': player, 'value': player} for player in df['name'].unique()],
+                value=top_players,
+                multi=True,
+                className='mb-3',
+                style={'padding': '10px'}
+            )
+
+        ], className='col-9'),
+        
+    ], className="dash-bootstrap row")
 
 def create_player_callback(app, position, df):
     """
@@ -300,7 +310,7 @@ def create_player_callback(app, position, df):
         [Input(f'{position.lower()}-stat-dropdown-x', 'value'),
          Input(f'{position.lower()}-stat-dropdown-y', 'value'),
          Input(f'{position.lower()}-player-dropdown', 'value'),
-         Input("color-mode-switch", "value")]
+         Input("color-mode-switch", "value")],
     )
     def update_chart(selected_stat_x, selected_stat_y, selected_players, switch_on):
         """assets
