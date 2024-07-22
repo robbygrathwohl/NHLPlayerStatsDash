@@ -20,10 +20,10 @@ app.title = 'NHL Player Stats - 23-24'
 #color switcher
 color_mode_switch =  html.Span(
     [
-        dbc.Label(className="fa fa-moon", html_for="color-mode-switch"),
+        dbc.Label(className="fa fa-sun", html_for="color-mode-switch"),
         #dbc.Switch( id="color-mode-switch", value=True, className="d-inline-block ms-1", persistence=True),
         dbc.Switch( id="color-mode-switch", value=True, className="d-inline-block ms-1", persistence=True),
-        dbc.Label(className="fa fa-sun", html_for="color-mode-switch"),
+        dbc.Label(className="fa fa-moon", html_for="color-mode-switch"),
     ]
 )
 
@@ -118,7 +118,7 @@ create_sidebar_callback(app, df.loc[df['situation']=='all'])
 clientside_callback(
     """
     (switchOn) => {
-       document.documentElement.setAttribute('data-bs-theme', switchOn ? 'light' : 'dark');  
+       document.documentElement.setAttribute('data-bs-theme', switchOn ? 'dark' : 'light');  
        return window.dash_clientside.no_update
     }
     """
